@@ -68,6 +68,33 @@ h1 span { color: var(--ink-3); }
 .help b { display: block; font-weight: 500; font-size: 17px; }
 .help span { display: block; color: #b8b8bd; font-size: 14.5px; margin-top: 6px; }
 
+/* Bouton « Toutes les nouveautés » et fenêtre qui s'ouvre */
+header { align-items: flex-end; }
+.open-feats { display: inline-flex; align-items: center; gap: 10px; font: inherit; font-weight: 500; font-size: 15px; color: var(--ink); background:
+  radial-gradient(circle at 15% 50%, rgba(130, 150, 190, 0.35), transparent 60%),
+  radial-gradient(circle at 85% 40%, rgba(200, 180, 160, 0.35), transparent 60%), var(--surface);
+  border: 1px solid #e2e3e8; border-radius: 999px; padding: 12px 20px; cursor: pointer; transition: border-color .2s, box-shadow .2s; }
+.open-feats:hover { border-color: #c9cbd3; box-shadow: 0 6px 18px -10px rgba(10,10,11,.25); }
+.open-feats .n { font-family: var(--mono); font-size: 12px; background: var(--ink); color: #fff; border-radius: 999px; padding: 3px 8px; }
+dialog.feats-dialog { width: min(860px, calc(100vw - 32px)); max-height: min(86vh, 900px); padding: 0; border: 0; border-radius: 26px; background: var(--bg); color: var(--ink); box-shadow: 0 40px 100px -30px rgba(10,10,11,.45); overflow: hidden; }
+dialog.feats-dialog::backdrop { background: rgba(10, 10, 11, 0.35); backdrop-filter: blur(4px); }
+dialog.feats-dialog[open] { display: flex; flex-direction: column; animation: pop .25s ease; }
+@keyframes pop { from { opacity: 0; transform: translateY(10px) scale(.98); } to { opacity: 1; transform: none; } }
+.fd-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; padding: 28px 30px 18px; border-bottom: 1px solid var(--line); }
+.fd-head .kick { margin: 0 0 6px; }
+.fd-head h2 { font-weight: 500; font-size: clamp(24px, 3vw, 32px); letter-spacing: -0.03em; line-height: 1.1; margin: 0; }
+.fd-close { flex: none; width: 40px; height: 40px; border-radius: 40px; border: 1px solid var(--line); background: var(--surface); font-size: 20px; line-height: 1; cursor: pointer; }
+.fd-body { min-height: 0; overflow-y: auto; padding: 8px 30px 30px; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 34px; }
+@media (max-width: 760px) { .fd-body { grid-template-columns: 1fr; } }
+.fd-group { padding-top: 22px; min-width: 0; }
+.fd-group-head { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 8px; }
+.fd-group h3 { font-weight: 600; font-size: 17px; margin: 0; }
+.watch { font: inherit; font-size: 13px; font-weight: 500; background: var(--surface); border: 1px solid var(--line); border-radius: 999px; padding: 5px 11px; cursor: pointer; white-space: nowrap; }
+.fd-group ul { list-style: none; margin: 0; padding: 0; }
+.fd-group li { position: relative; padding: 9px 0 9px 18px; border-top: 1px solid var(--line); font-size: 15px; line-height: 1.45; color: var(--ink-2); }
+.fd-group li:first-child { border-top: 0; }
+.fd-group li::before { content: ""; position: absolute; left: 0; top: 17px; width: 7px; height: 7px; border-radius: 7px; background: var(--live); }
+
 @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
 </style>
 </head>
@@ -81,6 +108,7 @@ h1 span { color: var(--ink-3); }
       <p class="kick">(Nouveautés)</p>
       <h1>Bienvenue dans OLA 2.0.</h1>
     </div>
+    <button class="open-feats" type="button" id="open-feats">✦ Voir toutes les nouveautés <span class="n" id="feats-n">31</span></button>
   </header>
 
   <div class="layout">
@@ -108,6 +136,17 @@ h1 span { color: var(--ink-3); }
       </div>
     </aside>
   </div>
+
+  <dialog class="feats-dialog" id="feats-dialog" aria-labelledby="fd-title">
+    <div class="fd-head">
+      <div>
+        <p class="kick">(OLA 2.0)</p>
+        <h2 id="fd-title">Toutes les nouveautés</h2>
+      </div>
+      <button class="fd-close" type="button" id="fd-close" aria-label="Fermer">×</button>
+    </div>
+    <div class="fd-body" id="fd-body"></div>
+  </dialog>
 </div>
 
 <script>
@@ -212,6 +251,68 @@ var VIDEOS = [
   });
 
   go(state.current || 0);
+
+  /* ----- Toutes les nouveautés : liste dans une fenêtre qui s'ouvre et se referme ----- */
+  var FEATURES = [
+    { title: "Pipeline", video: 1, items: [
+      "Déposez un CCA ou un CCV : OLA crée la fiche et les contacts pour vous",
+      "Remplissez vos formulaires OACIQ à partir du CRM et envoyez-les dans Instanet, prêts à signer",
+      "Faites remplir certaines questions d’un formulaire par votre client",
+      "Liez la propriété à la fiche avec son numéro MLS, et ajoutez tous les acheteurs ou propriétaires",
+      "Retrouvez les demandes d’infos et les visites de l’inscription directement dans la fiche",
+      "Déposez la promesse d’achat : les dates de conditions sont extraites et calculées en jours",
+      "Fixez vos délais par défaut et vos rappels automatiques, pour vous et pour votre client",
+      "Cochez vos conditions complétées directement depuis le pipeline",
+      "Annoncez la mise en ligne à votre vendeur en un clic, avec le lien Centris inclus"
+    ]},
+    { title: "Historique et relations clients", video: 2, items: [
+      "Glissez une transaction notariée dans « Gagné » pour la finaliser",
+      "Suivez votre volume, vos commissions et votre prix moyen, en ventes et en achats",
+      "Retrouvez le dossier complet de chaque ancienne transaction",
+      "Bâtissez votre plan de suivi après la vente : texto, courriel, appel ou mot écrit",
+      "Envoyez en un clic des suivis déjà rédigés, ou laissez-les partir automatiquement"
+    ]},
+    { title: "Portail client", video: 3, items: [
+      "Bâtissez le parcours acheteur et vendeur de vos clients, étape par étape",
+      "Choisissez à quelle étape du pipeline votre client reçoit son accès",
+      "Mettez le portail à votre image : logo, couleur, message et vidéo d’accueil",
+      "Ajoutez vos professionnels recommandés (courtier hypothécaire, notaire, inspecteur)",
+      "Voyez si votre client utilise son portail, et ajoutez-lui des tâches ou des formulaires",
+      "Votre client suit sa transaction, ses tâches et ses rendez-vous au même endroit",
+      "Votre client gère ses alertes Matrix à partir de son portail : il swipe les propriétés et demande les documents",
+      "Votre vendeur voit l’activité Centris de son inscription (option désactivable)"
+    ]},
+    { title: "Mes inscriptions", video: 6, items: [
+      "Reliez le statut de vos inscriptions aux étapes de votre pipeline",
+      "Choisissez l’envoi des documents automatique ou avec confirmation, par inscription",
+      "Annoncez la mise en ligne depuis l’inscription",
+      "Recontactez vos demandes d’infos, même pour leur proposer une propriété semblable",
+      "Publiez vos propriétés sur votre Facebook et votre Instagram personnels avec Muse, à partir des photos du CRM"
+    ]},
+    { title: "L’IA d’OLA", video: 7, items: [
+      "OLA fait ce que vous voulez qu’elle fasse dans votre CRM : la seule limite, ce sont vos besoins",
+      "Parlez-lui et elle agit pour vous : rendez-vous, tâches, documents, envois de masse",
+      "Confiez-lui des tâches récurrentes et la qualification de vos leads",
+      "Donnez-lui votre façon de parler, et utilisez-la sur l’app mobile, à la voix"
+    ]}
+  ];
+
+  var dlg = $('feats-dialog'), body = $('fd-body'), count = 0;
+  FEATURES.forEach(function (grp) {
+    var g = document.createElement('div'); g.className = 'fd-group';
+    var head = document.createElement('div'); head.className = 'fd-group-head';
+    var h = document.createElement('h3'); h.textContent = grp.title;
+    var w = document.createElement('button'); w.type = 'button'; w.className = 'watch'; w.textContent = '▶ Vidéo';
+    w.addEventListener('click', function () { dlg.close(); go(grp.video); window.scrollTo({ top: 0, behavior: 'smooth' }); });
+    head.appendChild(h); head.appendChild(w); g.appendChild(head);
+    var ul = document.createElement('ul');
+    grp.items.forEach(function (txt) { var li = document.createElement('li'); li.textContent = txt; ul.appendChild(li); count++; });
+    g.appendChild(ul); body.appendChild(g);
+  });
+  $('feats-n').textContent = count;
+  $('open-feats').addEventListener('click', function () { dlg.showModal(); body.scrollTop = 0; });
+  $('fd-close').addEventListener('click', function () { dlg.close(); });
+  dlg.addEventListener('click', function (e) { if (e.target === dlg) dlg.close(); });
 
 })();
 </script>
