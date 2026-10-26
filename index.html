@@ -95,6 +95,17 @@ dialog.feats-dialog[open] { display: flex; flex-direction: column; animation: po
 .fd-group li:first-child { border-top: 0; }
 .fd-group li::before { content: ""; position: absolute; left: 0; top: 17px; width: 7px; height: 7px; border-radius: 7px; background: var(--live); }
 
+/* Appel à l'action : réserver la mise en place */
+.help .cta, .fd-foot .cta { display: inline-flex; align-items: center; gap: 8px; margin-top: 16px; background: #fbfbfa; color: #0a0a0b; text-decoration: none; font-weight: 600; font-size: 15px; border-radius: 999px; padding: 12px 18px; transition: transform .2s, box-shadow .2s; }
+.help .cta:hover { transform: translateY(-1px); box-shadow: 0 8px 20px -10px rgba(0,0,0,.5); }
+.fd-foot { display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap; padding: 18px 30px; border-top: 1px solid var(--line); background: #18181b; color: #fbfbfa; }
+.fd-foot p { margin: 0; font-size: 15px; }
+.fd-foot p span { display: block; color: #b8b8bd; font-size: 14px; margin-top: 2px; }
+.fd-foot .cta { margin-top: 0; }
+[hidden] { display: none !important; }
+.end-cta { display: none; text-decoration: none; }
+.end-cta.on { display: inline-flex; }
+
 @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
 </style>
 </head>
@@ -120,6 +131,7 @@ dialog.feats-dialog[open] { display: flex; flex-direction: column; animation: po
         <p class="desc" id="desc"></p>
         <div class="actions">
           <button class="btn" id="prev" type="button">← Précédente</button>
+          <a class="btn primary end-cta" id="end-cta" href="https://api.ola-ai.ca/widget/bookings/mise-en-place-ola-20" target="_blank" rel="noopener">Réserver ma mise en place →</a>
           <button class="btn primary" id="next" type="button">J’ai terminé, vidéo suivante →</button>
         </div>
       </div>
@@ -132,7 +144,8 @@ dialog.feats-dialog[open] { display: flex; flex-direction: column; animation: po
       </nav>
       <div class="help">
         <b>On configure tout ça avec vous.</b>
-        <span>Écrivez-nous sur Messenger ou dans notre groupe pour réserver votre appel.</span>
+        <span>Réservez votre appel de mise en place OLA 2.0 : on règle vos délais, vos rappels, votre portail client et votre IA ensemble.</span>
+        <a class="cta" href="https://api.ola-ai.ca/widget/bookings/mise-en-place-ola-20" target="_blank" rel="noopener">Réserver ma mise en place →</a>
       </div>
     </aside>
   </div>
@@ -146,6 +159,10 @@ dialog.feats-dialog[open] { display: flex; flex-direction: column; animation: po
       <button class="fd-close" type="button" id="fd-close" aria-label="Fermer">×</button>
     </div>
     <div class="fd-body" id="fd-body"></div>
+    <div class="fd-foot">
+      <p>On met tout ça en place avec vous.<span>Un appel pour configurer OLA 2.0 à votre image.</span></p>
+      <a class="cta" href="https://api.ola-ai.ca/widget/bookings/mise-en-place-ola-20" target="_blank" rel="noopener">Réserver ma mise en place →</a>
+    </div>
   </dialog>
 </div>
 
@@ -240,7 +257,10 @@ var VIDEOS = [
     $('title').textContent = v.title;
     $('desc').textContent = v.desc;
     $('prev').disabled = state.current === 0;
-    $('next').textContent = state.current === VIDEOS.length - 1 ? 'J’ai terminé ✓' : 'J’ai terminé, vidéo suivante →';
+    var last = state.current === VIDEOS.length - 1;
+    $('next').textContent = 'J’ai terminé, vidéo suivante →';
+    $('next').hidden = last;
+    $('end-cta').classList.toggle('on', last);
     renderList(); renderProgress();
   }
 
